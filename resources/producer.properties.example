@@ -1,0 +1,7 @@
+# https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html
+
+bootstrap.servers=localhost:9092
+acks=1
+
+key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
+value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
