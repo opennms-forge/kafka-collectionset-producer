@@ -1,4 +1,4 @@
-# Kafka CollectionSet Consumer
+# Kafka CollectionSet Producer
 
 A reference implementation for producing OpenNMS metric CollectionSets, produced by the `opennms-kafka-producer` feature, to Apache Kafka.
 
