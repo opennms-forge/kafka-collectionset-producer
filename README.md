@@ -22,10 +22,19 @@ usage: kafka-collectionset-producer
     --config <arg>              Path to Kafka producer properties file
                                 (Required!)
     --delayms <arg>             Delay (in milliseconds) between sending
-                                each message (Default: 100)
-    --messages <arg>            Limit number of messages per producer
-                                (Default: 0 - no limit)
+                                each message. Use this to rate limit.
+                                (Default: 100)
+    --messages <arg>            Limit number of messages output per
+                                producer (Default: 0 - no limit)
+    --numerics <arg>            Upper bound for numeric attributes. Count
+                                of numeric attributes per CollectionSet
+                                will be randomized between 1 and this
+                                value. (Default: 10
     --producers <arg>           Number of producer threads (default: 1)
+    --strings <arg>             Upper bound for string attributes. Count
+                                of string attributes per CollectionSet
+                                will be randomized between 1 and this
+                                value. (Default: 5
     --topic <arg>               Target Kafka topic name (Default: metrics)
 ```
 
@@ -34,25 +43,61 @@ Specify the topic from which to consumer using the `--topic` option.
 
 CollectionSets are generated according to [the CollectionSet proto](https://github.com/OpenNMS/opennms/blob/develop/features/kafka/producer/src/main/proto/collectionset.proto) containing random data, similar to:
 ```shell
-timestamp: 1770145207771
+timestamp: 1770155143414
 resource {
   node {
-    node_id: 124
+    node_id: 683
     foreign_source: "test"
-    foreign_id: "fs-3066"
-    node_label: "node-85"
+    foreign_id: "fs-1720"
+    node_label: "node-6"
   }
   string {
-    name: "cpuLabel"
-    value: "cpuSlot-5.381154822927956"
+    name: "metricLabel-0"
+    value: "aStringValue-3"
   }
   numeric {
-    name: "cpuLoad"
-    value: 1.0593759044928097
+    name: "gaugeValue-0"
+    value: 71.61496446987059
+  }
+  numeric {
+    name: "gaugeValue-1"
+    value: 55.495022449323436
+  }
+  numeric {
+    name: "gaugeValue-2"
+    value: 66.75075715603835
+  }
+  numeric {
+    name: "gaugeValue-3"
+    value: 6.242728765988015
+  }
+  numeric {
+    name: "gaugeValue-4"
+    value: 63.90024607426715
+  }
+  numeric {
+    name: "gaugeValue-5"
+    value: 43.75600890770216
+  }
+  numeric {
+    name: "gaugeValue-6"
+    value: 77.08690814197512
+  }
+  numeric {
+    name: "gaugeValue-7"
+    value: 35.47059050330459
+  }
+  numeric {
+    name: "gaugeValue-8"
+    value: 81.56508304030228
+  }
+  numeric {
+    name: "gaugeValue-9"
+    value: 63.790920089622375
   }
 }
 ```
-Each generated CollectionSet contains one numeric attribute and one string attribute. Real CollectionSets may contain many of each type.
+Each generated CollectionSet contains a random number of numeric attributes (gauges), between 1 and `--numerics` (Default 10), and a random number of string attributes between 0 and `--strings` (Default 5). This mimics the variability real environment would produce, but is at best a rough approximation.
 
 These messsages can be consumed with the partner to this tool, the [Kafka CollectionSet Consumer](https://github.com/opennms-forge/kafka-collectionset-consumer)
 

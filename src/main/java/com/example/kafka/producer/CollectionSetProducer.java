@@ -60,13 +60,25 @@ public class CollectionSetProducer {
         options.addOption(Option.builder()
                 .longOpt("messages")
                 .hasArg()
-                .desc("Limit number of messages per producer (Default: 0 - no limit)")
+                .desc("Limit number of messages output per producer (Default: 0 - no limit)")
                 .build());
 
         options.addOption(Option.builder()
                 .longOpt("delayms")
                 .hasArg()
-                .desc("Delay (in milliseconds) between sending each message (Default: 100)")
+                .desc("Delay (in milliseconds) between sending each message. Use this to rate limit. (Default: 100)")
+                .build());
+
+        options.addOption(Option.builder()
+                .longOpt("numerics")
+                .hasArg()
+                .desc("Upper bound for numeric attributes. Count of numeric attributes per CollectionSet will be randomized between 1 and this value. (Default: 10")
+                .build());
+
+        options.addOption(Option.builder()
+                .longOpt("strings")
+                .hasArg()
+                .desc("Upper bound for string attributes. Count of string attributes per CollectionSet will be randomized between 1 and this value. (Default: 5")
                 .build());
 
         CommandLineParser parser = new DefaultParser();
@@ -92,6 +104,8 @@ public class CollectionSetProducer {
         int producers = Integer.parseInt(cmd.getOptionValue("producers", "1"));
         int messages = Integer.parseInt(cmd.getOptionValue("messages", "0"));
         int delayMs = Integer.parseInt(cmd.getOptionValue("delayms", "100"));
+        int maxNumerics = Integer.parseInt(cmd.getOptionValue("numerics", "10"));
+        int maxStrings = Integer.parseInt(cmd.getOptionValue("strings", "5"));
 
         System.out.printf(
                 " bootstrap=%s%n topic=%s%n producer_threads=%d%n messages=%d%n",
@@ -104,7 +118,7 @@ public class CollectionSetProducer {
                 new KafkaCollectionSetProducer(props, topic);
 
         for (int i = 0; i < producers; i++) {
-            executor.submit(new ProducerWorker(producer, messages, delayMs));
+            executor.submit(new ProducerWorker(producer, messages, delayMs, maxNumerics, maxStrings));
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
