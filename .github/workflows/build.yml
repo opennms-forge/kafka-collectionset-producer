@@ -1,5 +1,5 @@
-name: ${{ github.event.repository.name }}
-run-name: Build ${{ github.event.repository.name }}
+name: opennms-kafka-collectionset-producer
+run-name: Build kafka-collectionset-producer
 on:
   push:
   workflow_dispatch:
