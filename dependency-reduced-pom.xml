@@ -52,6 +52,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <finalName>${project.artifactId}</finalName>
               <transformers>
                 <transformer>
                   <mainClass>com.example.kafka.producer.CollectionSetProducer</mainClass>
