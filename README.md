@@ -24,6 +24,8 @@ usage: kafka-collectionset-producer
     --delayms <arg>             Delay (in milliseconds) between sending
                                 each message. Use this to rate limit.
                                 (Default: 100)
+    --format <arg>              Message format: protobuf or json (Default:
+                                protobuf)
     --messages <arg>            Limit number of messages output per
                                 producer (Default: 0 - no limit)
     --numerics <arg>            Upper bound for numeric attributes. Count
@@ -39,7 +41,17 @@ usage: kafka-collectionset-producer
 ```
 
 You can tailor the number of producer threads to your environment using the `--producers` option.
-Specify the topic from which to consumer using the `--topic` option.
+Specify the topic to produce to using the `--topic` option.
+
+### Message format
+
+By default, CollectionSets are serialized as protobuf, matching the default wire format of the `opennms-kafka-producer` feature.
+Pass `--format json` to serialize them as JSON instead, matching the output of the `opennms-kafka-producer` feature when `metrics.useJson=true` is set.
+The JSON is produced with the protobuf `JsonFormat` printer using lowerCamelCase field names, 64-bit integers rendered as strings, and the numeric attribute `type` always present (including the default `GAUGE`):
+```json
+{"timestamp":"1791231041143","resource":[{"node":{"nodeId":"2","foreignSource":"test","foreignId":"fs-715","nodeLabel":"node-658"},"string":[{"name":"metricLabel-0","value":"aStringValue-1"}],"numeric":[{"name":"gaugeValue-0","value":69.27219919391374,"type":"GAUGE"},{"name":"gaugeValue-1","value":99.97719252660771,"type":"GAUGE"}]}]}
+```
+The consumer must be started with the matching `--format` value to decode the messages.
 
 CollectionSets are generated according to [the CollectionSet proto](https://github.com/OpenNMS/opennms/blob/develop/features/kafka/producer/src/main/proto/collectionset.proto) containing random data, similar to:
 ```shell
@@ -99,7 +111,7 @@ resource {
 ```
 Each generated CollectionSet contains a random number of numeric attributes (gauges), between 1 and `--numerics` (Default 10), and a random number of string attributes between 0 and `--strings` (Default 5). This mimics the variability real environment would produce, but is at best a rough approximation.
 
-These messsages can be consumed with the partner to this tool, the [Kafka CollectionSet Consumer](https://github.com/opennms-forge/kafka-collectionset-consumer)
+These messsages can be consumed with the partner to this tool, the [Kafka CollectionSet Consumer](https://github.com/opennms-forge/kafka-collectionset-consumer), using the same `--format` value.
 
 ## Instrumentation
 
@@ -125,6 +137,7 @@ value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
 $ java -jar target/opennms-kafka-collectionset-generator-1.0.0.jar --config /tmp/producer.properties --producers 1 --topic metrics
  bootstrap=kafka:9094
  topic=metrics
+ format=protobuf
  producer_threads=1
  messages=0
 [main] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values:

@@ -52,6 +52,12 @@ public class CollectionSetProducer {
                 .build());
 
         options.addOption(Option.builder()
+                .longOpt("format")
+                .hasArg()
+                .desc("Message format: protobuf or json (Default: protobuf)")
+                .build());
+
+        options.addOption(Option.builder()
                 .longOpt("producers")
                 .hasArg()
                 .desc("Number of producer threads (default: 1)")
@@ -101,6 +107,12 @@ public class CollectionSetProducer {
         }
 
         String topic = cmd.getOptionValue("topic", "metrics");
+        String format = cmd.getOptionValue("format", "protobuf").toLowerCase();
+        if (!format.equals("protobuf") && !format.equals("json")) {
+            System.err.println("Invalid --format value '" + format + "'. Must be 'protobuf' or 'json'.");
+            new HelpFormatter().printHelp("kafka-collectionset-producer", options);
+            System.exit(1);
+        }
         int producers = Integer.parseInt(cmd.getOptionValue("producers", "1"));
         int messages = Integer.parseInt(cmd.getOptionValue("messages", "0"));
         int delayMs = Integer.parseInt(cmd.getOptionValue("delayms", "100"));
@@ -108,14 +120,14 @@ public class CollectionSetProducer {
         int maxStrings = Integer.parseInt(cmd.getOptionValue("strings", "5"));
 
         System.out.printf(
-                " bootstrap=%s%n topic=%s%n producer_threads=%d%n messages=%d%n",
-                props.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG), topic, producers, messages
+                " bootstrap=%s%n topic=%s%n format=%s%n producer_threads=%d%n messages=%d%n",
+                props.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG), topic, format, producers, messages
         );
 
         ExecutorService executor = Executors.newFixedThreadPool(producers);
 
         KafkaCollectionSetProducer producer =
-                new KafkaCollectionSetProducer(props, topic);
+                new KafkaCollectionSetProducer(props, topic, format);
 
         for (int i = 0; i < producers; i++) {
             executor.submit(new ProducerWorker(producer, messages, delayMs, maxNumerics, maxStrings));
